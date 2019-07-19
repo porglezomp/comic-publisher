@@ -1,14 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>{{ title }}</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body class="col">
-    <header>
-    </header>
-    <main>
-    </main>
-    <footer>
-    </footer>
+<header class="row base">
+    <a href="/"><h1>{{ title }}</h1></a>
+    <div class="spacer"></div>
+    <nav><ul></ul></nav>
+</header>
+<main>
+{% for page in comic.pages %}
+    <img src="/{{ page }}">
+{% endfor %}
+</main>
+<div class="spacer"></div>
+<footer>
+    {{ copyright }}
+</footer>
 </body>
 </html>
