@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+</head>
+<body class="col">
+    <header>
+    </header>
+    <main>
+    {% for comic in comics %}
+        <a href="{{ comic[0].folder }}">{{ comic[0].title }}</a>
+        {% for page in comic[1] %}
+            {{ page }}
+        {% endfor %}
+    {% endfor %}
+    </main>
+    <footer>
+    </footer>
+</body>
+</html>

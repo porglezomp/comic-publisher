@@ -1,18 +1,19 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{
     fs::{self, File},
     io::{self, ErrorKind, Write},
     path::{Path, PathBuf},
 };
+use tera::Tera;
 use toml;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 struct Config {
     title: String,
     comics: Vec<Comic>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 struct Comic {
     folder: PathBuf,
     title: String,
@@ -20,6 +21,13 @@ struct Comic {
 }
 
 fn main() -> io::Result<()> {
+    let tera = match Tera::new("templates/**/*") {
+        Ok(tera) => tera,
+        Err(err) => {
+            println!("Parsing error(s): {}", err);
+            ::std::process::exit(1);
+        }
+    };
     let root = Path::new("input");
     if !root.is_dir() {
         fs::create_dir("input")?;
@@ -49,14 +57,22 @@ fn main() -> io::Result<()> {
         let mut pages = Vec::new();
         for page in fs::read_dir(comic_folder)? {
             match page {
-                Ok(page) => pages.push(page),
+                Ok(page) => pages.push(page.path()),
                 Err(err) => errors.push(format!("Error reading page {}", err)),
             }
         }
         comics.push((comic, pages));
     }
 
-    // @TODO: Produce the index page
+    let mut context = tera::Context::new();
+    context.insert("comics", &comics);
+    context.insert("title", &config.title);
+
+    let result = tera
+        .render("index.html", context)
+        .map_err(|e| io::Error::new(ErrorKind::Other, format!("Couldn't render index: {}", e)))?;
+    fs::write("output/index.html", result)?;
+
     // @TODO: Produce the individual pages
 
     if !errors.is_empty() {
