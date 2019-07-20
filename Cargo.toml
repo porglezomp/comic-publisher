@@ -1,5 +1,5 @@
 [package]
-name = "comics"
+name = "comics" 
 version = "0.1.0"
 authors = ["Cassie Jones <code@witchoflight.com>"]
 edition = "2018"
@@ -10,3 +10,6 @@ edition = "2018"
 toml = "0.5"
 serde = { version = "1.0", features = ["derive"] }
 tera = "1.0.0-beta.13"
+hyper-staticfile = "0.3.1"
+futures = "0.1.21"
+hyper = "0.12.1"

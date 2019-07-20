@@ -79,11 +79,15 @@ fn main() -> io::Result<()> {
         .map_err(|err| io::Error::new(ErrorKind::InvalidData, err))?;
     let mut errors = Vec::new();
     let mut comics = Vec::new();
-    let pages: Vec<_> = config.pages.into_iter().map(|page| Page {
-        page: page.page,
-        title: page.title,
-        content: page.content,
-    }).collect();
+    let pages: Vec<_> = config
+        .pages
+        .into_iter()
+        .map(|page| Page {
+            page: page.page,
+            title: page.title,
+            content: page.content,
+        })
+        .collect();
     for comic in config.comics {
         let comic_folder = root.join(&comic.folder);
         if !comic_folder.is_dir() {
@@ -229,6 +233,7 @@ fn main() -> io::Result<()> {
 }
 
 static CONFIG: &str = r#"title = "Comic Website"
+copyright = "Copyright &copy; 2019"
 
 [[pages]]
 page = "about"
