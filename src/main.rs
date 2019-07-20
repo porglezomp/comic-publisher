@@ -7,19 +7,27 @@ use std::{
 use tera::Tera;
 use toml;
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Debug)]
 struct Config {
     title: String,
+    pages: Vec<ImportPage>,
     comics: Vec<ImportComic>,
     copyright: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Debug)]
 struct ImportComic {
     folder: PathBuf,
     thumbnail: PathBuf,
     title: String,
     description: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct ImportPage {
+    page: String,
+    title: String,
+    content: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -29,6 +37,13 @@ struct Comic {
     url: String,
     description: String,
     pages: Vec<String>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+struct Page {
+    page: String,
+    title: String,
+    content: String,
 }
 
 fn main() -> io::Result<()> {
@@ -56,6 +71,11 @@ fn main() -> io::Result<()> {
         .map_err(|err| io::Error::new(ErrorKind::InvalidData, err))?;
     let mut errors = Vec::new();
     let mut comics = Vec::new();
+    let pages: Vec<_> = config.pages.into_iter().map(|page| Page {
+        page: page.page,
+        title: page.title,
+        content: page.content,
+    }).collect();
     for comic in config.comics {
         let comic_folder = root.join(&comic.folder);
         if !comic_folder.is_dir() {
@@ -116,6 +136,7 @@ fn main() -> io::Result<()> {
 
     let mut context = tera::Context::new();
     context.insert("comics", &comics);
+    context.insert("pages", &pages);
     context.insert("title", &config.title);
     context.insert("copyright", &config.copyright);
 
@@ -146,7 +167,24 @@ fn main() -> io::Result<()> {
         }
     }
 
-    for comic in comics {
+    for page in &pages {
+        let mut context = tera::Context::new();
+        context.insert("pages", &pages);
+        context.insert("page", page);
+        context.insert("title", &config.title);
+        context.insert("copyright", &config.copyright);
+
+        match tera.render("page.html", context) {
+            Ok(result) => {
+                let dir = Path::new("output").join(&page.page);
+                fs::create_dir_all(&dir)?;
+                fs::write(dir.join("index.html"), result)?;
+            }
+            Err(err) => errors.push(format!("Couldn't render comic {}: {}", &page.title, err)),
+        }
+    }
+
+    for comic in &comics {
         copy(&comic.thumbnail, &mut errors);
         for page in &comic.pages {
             copy(&page, &mut errors);
@@ -154,12 +192,13 @@ fn main() -> io::Result<()> {
 
         let mut context = tera::Context::new();
         context.insert("comic", &comic);
+        context.insert("pages", &pages);
         context.insert("title", &config.title);
         context.insert("copyright", &config.copyright);
 
         match tera.render("comic.html", context) {
             Ok(result) => {
-                let dir = Path::new("output").join(comic.url);
+                let dir = Path::new("output").join(&comic.url);
                 fs::create_dir_all(&dir)?;
                 fs::write(dir.join("index.html"), result)?;
             }
@@ -207,6 +246,14 @@ that has multiple comics listed:
 
     title = "A Comics Site"
     copyright = "Copyright &copy; 2019 Cassie Jones"
+
+    [[pages]]
+    link = "about"
+    title = "About"
+    content = """
+    This is a demo comics website!
+    You can put just whatever in here!
+    """
 
     [[comics]]
     folder = "comic"
