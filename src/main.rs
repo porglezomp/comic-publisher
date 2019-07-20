@@ -46,6 +46,14 @@ struct Page {
     content: String,
 }
 
+fn doc_text(text: &str) -> String {
+    if cfg!(windows) {
+        text.replace("\n", "\r\n")
+    } else {
+        text.to_string()
+    }
+}
+
 fn main() -> io::Result<()> {
     let tera = match Tera::new("templates/**/*") {
         Ok(tera) => tera,
@@ -58,9 +66,9 @@ fn main() -> io::Result<()> {
     if !root.is_dir() {
         fs::create_dir("input")?;
         let mut config = File::create("input/config.toml")?;
-        config.write_all(CONFIG.as_bytes())?;
+        config.write_all(doc_text(CONFIG).as_bytes())?;
         let mut readme = File::create("input/README.txt")?;
-        readme.write_all(README.as_bytes())?;
+        readme.write_all(doc_text(README).as_bytes())?;
         fs::create_dir("input/comic")?;
         return Ok(());
     }
