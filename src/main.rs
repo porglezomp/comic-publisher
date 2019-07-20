@@ -72,6 +72,16 @@ fn main() -> io::Result<()> {
                 Err(err) => errors.push(format!("Error reading page {}", err)),
             }
         }
+        let mut pages: Vec<_> = pages
+            .iter()
+            .map(|p| {
+                Path::new("images")
+                    .join(p.path().strip_prefix("input").unwrap())
+                    .display()
+                    .to_string()
+            })
+            .collect();
+        pages.sort();
         comics.push(Comic {
             title: comic.title,
             thumbnail: Path::new("images")
@@ -80,15 +90,7 @@ fn main() -> io::Result<()> {
                 .to_string(),
             url: comic.folder.display().to_string(),
             description: comic.description,
-            pages: pages
-                .iter()
-                .map(|p| {
-                    Path::new("images")
-                        .join(p.path().strip_prefix("input").unwrap())
-                        .display()
-                        .to_string()
-                })
-                .collect(),
+            pages,
         });
     }
 
