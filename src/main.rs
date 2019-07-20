@@ -222,6 +222,14 @@ fn main() -> io::Result<()> {
 
 static CONFIG: &str = r#"title = "Comic Website"
 
+[[pages]]
+page = "about"
+title = "About"
+content = """
+This is a demo comics website!
+You can put just whatever in here!
+"""
+
 [[comics]]
 folder = "comic"
 title = "First Comic"
@@ -239,16 +247,32 @@ inside. Put your pages inside the folder and name your pages in
 alphabetical order. An easy way to do this is just number them all,
 for example page-01.png or 01-pagetitle.png.
 
-Edit the config.toml file. You should be able to use any text editor on
-your computer. You want to make one entry for each comic. They will be
-listed on the site in the order you put them here. Here's an example
-that has multiple comics listed:
+Edit the config.toml file. You should be able to use any text editor on your
+computer. You want to make one entry for each comic and each page. They will
+be listed on the site in the order you put them here.
+
+Pages have 3 parts.
+- page: Determines what the url will be. If the page is "about", then you'll
+  have a url like example.com/about.
+- title: How the page is labelled everywhere.
+- content: Used to fill in the page. You can put any HTML you want in the
+  content, including just writing some plain text.
+
+Comic entries have 4 parts.
+- folder: Determines the url of the comic, and where to find the folder of images.
+- thumbnail: The URL of the image to use as the comic thumbnail. If you don't
+  have a specifically made thumbnail image, consider just using the first
+  page of the comic.
+- title: How the comic is labelled on the home page and the comic page.
+- description: A description for the comic. This isn't used anywhere yet.
+
+Here's a full example that has multiple comics and a page listed:
 
     title = "A Comics Site"
     copyright = "Copyright &copy; 2019 Cassie Jones"
 
     [[pages]]
-    link = "about"
+    page = "about"
     title = "About"
     content = """
     This is a demo comics website!

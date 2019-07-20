@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <main>
+<h2>{{ comic.title }}</h2>
 {% for page in comic.pages %}
     <img src="/{{ page }}">
 {% endfor %}
