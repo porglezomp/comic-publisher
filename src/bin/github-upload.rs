@@ -134,6 +134,10 @@ You may have accidentally included the wrong repository name. If you're sure thi
         &temp_dir.path(),
         &fs_extra::dir::CopyOptions::new(),
     )?;
+    if let Some(ref domain) = config.domain {
+        println!("Adding CNAME...");
+        fs::write(temp_dir.path().join("CNAME"), domain)?;
+    }
     println!("Creating git repository...");
     let repository = git2::Repository::init(&temp_dir.path())?;
     let mut index = repository.index()?;
