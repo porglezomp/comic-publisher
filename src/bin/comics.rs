@@ -282,6 +282,7 @@ Comic entries have 4 parts.
 Here's a full example that has multiple comics and a page listed:
 
     title = "A Comics Site"
+    author = "Cassie Jones"
     copyright = "Copyright &copy; 2019 Cassie Jones"
 
     [[pages]]
@@ -311,4 +312,22 @@ Here's a full example that has multiple comics and a page listed:
 
 Once this is set up, every time your run the program, it will build
 your comic into the output folder.
+
+If you'd like to upload your comic via github, add a [github] section
+in the file. For example:
+
+    [github]
+    username = "porglezomp"
+    repository = "comic-publisher-upload"
+    domain = "comic.witchoflight.com"
+    author = "Cassie Jones"
+    email = "code@witchoflight.com"
+
+- username: Your GitHub username.
+- repository: The repository name that the comic will be uploaded to.
+  This should not be a repository that anything else will be uploaded to.
+- domain: (optional) The custom domain that you want the website to be on.
+- author: (optional) The author name to attribute the git commits to.
+- email: (optional) The email to attribuet the git commits to.
+  This should probably match the email you use for GitHub. 
 "#;
