@@ -62,13 +62,15 @@ fn main() -> io::Result<()> {
             ::std::process::exit(1);
         }
     };
+
     let root = Path::new("input");
-    if !root.is_dir() {
-        fs::create_dir("input")?;
+    let needs_init = !root.is_dir();
+    fs::create_dir_all("input")?;
+    let mut readme = File::create("input/README.txt")?;
+    readme.write_all(doc_text(README).as_bytes())?;
+    if needs_init {
         let mut config = File::create("input/config.toml")?;
         config.write_all(doc_text(CONFIG).as_bytes())?;
-        let mut readme = File::create("input/README.txt")?;
-        readme.write_all(doc_text(README).as_bytes())?;
         fs::create_dir("input/comic")?;
         return Ok(());
     }
