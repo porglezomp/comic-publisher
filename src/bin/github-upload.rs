@@ -115,10 +115,11 @@ fn run() -> Result<(), Box<dyn Error>> {
     struct Repo {
         description: Option<String>,
         html_url: String,
+        size: usize,
     }
     let repo: Repo = res.json()?;
 
-    if repo.description.as_ref() != Some(&description) {
+    if repo.size != 0 && repo.description.as_ref() != Some(&description) {
         // @TODO: Handle keeping the message open.
         println!(
             r#"The repository specified ({}) has an unexpected description.
