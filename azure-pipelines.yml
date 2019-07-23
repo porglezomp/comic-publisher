@@ -6,6 +6,9 @@
 trigger:
 - master
 
+pr:
+- master
+
 strategy:
   matrix:
     windows-stable:
@@ -30,7 +33,7 @@ steps:
       echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
     displayName: Install rust
     condition: eq( variables['Agent.OS'], 'Windows_NT' )
-  - script: cargo build --all
+  - script: cd core; cargo build --all
     displayName: Cargo build
-  - script: cargo test --all
+  - script: cd core; cargo test --all
     displayName: Cargo test
