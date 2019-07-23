@@ -162,8 +162,10 @@ You may have accidentally included the wrong repository name. If you're sure thi
     repository.commit(
         Some("HEAD"),
         &git2::Signature::now(
-            &config.author.unwrap_or_default(),
-            &config.email.unwrap_or_default(),
+            &config.author.unwrap_or_else(|| "comic-publisher".into()),
+            &config
+                .email
+                .unwrap_or_else(|| "code+comic-publisher@witchoflight.com".into()),
         )?,
         &git2::Signature::now("comic-publisher", "code+comic-publisher@witchoflight.com")?,
         "Comic upload",
