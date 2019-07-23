@@ -50,7 +50,18 @@ fn read_token(prompt: &str, path: impl AsRef<Path>) -> io::Result<String> {
 
 const API_V3: &str = "application/vnd.github.v3+json";
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() {
+    match run() {
+        Ok(()) => (),
+        Err(err) => {
+            println!("{}", err);
+            println!("Press [enter] to finish.");
+            io::stdin().read_line(&mut String::new()).unwrap();
+        }
+    }
+}
+
+fn run() -> Result<(), Box<dyn Error>> {
     let config_text = fs::read_to_string("input/config.toml")?;
     let Config {
         title,

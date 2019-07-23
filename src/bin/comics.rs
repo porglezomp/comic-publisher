@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
-    error::Error,
     fs::{self, File},
     io::{self, ErrorKind, Write},
     path::{Path, PathBuf},
