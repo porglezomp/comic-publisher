@@ -180,5 +180,58 @@ You may have accidentally included the wrong repository name. If you're sure thi
     println!("Pushing...");
     remote.push(&["+refs/heads/master:refs/heads/master"], None)?;
 
+    #[derive(Serialize)]
+    struct GitHubPages<'a> {
+        source: GitHubPagesSource<'a>,
+    }
+
+    #[derive(Serialize)]
+    struct GitHubPagesSource<'a> {
+        branch: &'a str,
+        path: &'a str,
+    }
+
+    println!("Attempting to update settings...");
+    let _ = client
+        .post(&format!(
+            "https://api.github.com/repos/{}/{}/pages",
+            &config.username, &config.repository,
+        ))
+        .header(
+            header::ACCEPT,
+            "application/vnd.github.switcheroo-preview+json",
+        )
+        .basic_auth(&config.username, Some(&token))
+        .json(&GitHubPages {
+            source: GitHubPagesSource {
+                branch: "master",
+                path: "",
+            },
+        })
+        .send();
+
+    #[derive(Deserialize)]
+    struct PagesResponse {
+        html_url: String,
+    }
+    let mut res = client
+        .get(&format!(
+            "https://api.github.com/repos/{}/{}/pages",
+            &config.username, &config.repository,
+        ))
+        .header(
+            header::ACCEPT,
+            "application/vnd.github.mister-fantastic-preview+json",
+        )
+        .basic_auth(&config.username, Some(&token))
+        .send()?;
+
+    let pages_response: PagesResponse = res.json()?;
+    println!(
+        r#"Your site has been published to {}
+(It may take a few minutes to update.)"#,
+        pages_response.html_url
+    );
+
     Ok(())
 }
