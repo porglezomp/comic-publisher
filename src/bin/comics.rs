@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::{
+    collections::HashMap,
+    error::Error,
     fs::{self, File},
     io::{self, ErrorKind, Write},
     path::{Path, PathBuf},
@@ -13,6 +15,12 @@ struct Config {
     pages: Vec<ImportPage>,
     comics: Vec<ImportComic>,
     copyright: Option<String>,
+    #[serde(default = "default_base_path")]
+    base_path: String,
+}
+
+fn default_base_path() -> String {
+    "/".into()
 }
 
 #[derive(Deserialize, Debug)]
@@ -54,8 +62,29 @@ fn doc_text(text: &str) -> String {
     }
 }
 
+fn make_path(root: String) -> impl tera::Function {
+    move |args: &HashMap<String, tera::Value>| {
+        let path = args
+            .get("path")
+            .ok_or_else(|| tera::Error::msg("Missing parameter `path`"))?
+            .as_str()
+            .ok_or_else(|| tera::Error::msg("Expected `path` to be a string"))?;
+        Ok(Path::new("/")
+            .join(&root)
+            .join(
+                Path::new(path)
+                    .strip_prefix("/")
+                    .unwrap_or_else(|_| Path::new(path)),
+            )
+            .display()
+            .to_string()
+            .replace("\\", "/")
+            .into())
+    }
+}
+
 fn main() -> io::Result<()> {
-    let tera = match Tera::new("templates/**/*") {
+    let mut tera = match Tera::new("templates/**/*") {
         Ok(tera) => tera,
         Err(err) => {
             println!("Parsing error(s): {}", err);
@@ -147,6 +176,8 @@ fn main() -> io::Result<()> {
             ));
         }
     }
+
+    tera.register_function("abs", make_path(config.base_path.clone()));
 
     let mut context = tera::Context::new();
     context.insert("comics", &comics);
@@ -266,6 +297,18 @@ Edit the config.toml file. You should be able to use any text editor on your
 computer. You want to make one entry for each comic and each page. They will
 be listed on the site in the order you put them here.
 
+The main file has several pieces of information describing the site as a whole.
+- title: The title of the site, displayed at the top of the page.
+- author: (optional) The site's author. This is currently unused.
+- copyright: (optional) The copyright to include in the footer of the site.
+  You can put any HTML you want in here, and it will be included verbatim.
+  A good default is simply "Copyright &copy; <Your Name>".
+- base_path: (optional) The base path of the website. You can leave this out
+  if you're publishing your website at the root of a domain, like for instance
+  directly at example.com. If you'll be publishing at example.com/comic
+  however, you need to set the base_path to "comic". If you're going to publish
+  on GitHub, you should make this the same as your repo name.
+
 Pages have 3 parts.
 - page: Determines what the url will be. If the page is "about", then you'll
   have a url like example.com/about.
@@ -286,6 +329,7 @@ Here's a full example that has multiple comics and a page listed:
     title = "A Comics Site"
     author = "Cassie Jones"
     copyright = "Copyright &copy; 2019 Cassie Jones"
+    base_path = "a-comics-site"
 
     [[pages]]
     page = "about"
@@ -319,17 +363,19 @@ If you'd like to upload your comic via github, add a [github] section
 in the file. For example:
 
     [github]
-    username = "porglezomp"
-    repository = "comic-publisher-upload"
-    domain = "comic.witchoflight.com"
-    author = "Cassie Jones"
-    email = "code@witchoflight.com"
+    username = "<your github name>"
+    repository = "a-comics-site"
+    domain = "comic.example.com"
+    author = "<your name here>"
+    email = "you@example.com"
 
 - username: Your GitHub username.
 - repository: The repository name that the comic will be uploaded to.
   This should not be a repository that anything else will be uploaded to.
 - domain: (optional) The custom domain that you want the website to be on.
+  If you leave this out, it will be published to the default URL at
+  http://<username>.github.io/<repository>
 - author: (optional) The author name to attribute the git commits to.
-- email: (optional) The email to attribuet the git commits to.
-  This should probably match the email you use for GitHub. 
+- email: (optional) The email to attribute the git commits to.
+  This should probably match the email you use for GitHub.
 "#;

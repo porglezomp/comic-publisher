@@ -3,7 +3,7 @@
 <main>
 <h2>{{ comic.title }}</h2>
 {% for page in comic.pages %}
-    <img src="/{{ page }}">
+    <img src="{{ abs(path=page) }}">
 {% endfor %}
 </main>
 {% endblock content %}

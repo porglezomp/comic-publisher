@@ -2,7 +2,9 @@
 {% block content %}
 <main class="grid">
 {% for comic in comics %}
-    <a class="article" style="background-image: url(/{{ comic.thumbnail }})" href="/{{ comic.url }}">
+    <a class="article"
+       style="background-image: url({{ abs(path=comic.thumbnail) | safe }})"
+       href="{{ abs(path=comic.url) | safe }}">
         <h2>{{ comic.title }}</h2>
     </a>
 {% endfor %}
