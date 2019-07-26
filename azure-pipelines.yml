@@ -4,10 +4,9 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
-
-pr:
-- master
+  tags:
+    include:
+      - "v*"
 
 strategy:
   matrix:
